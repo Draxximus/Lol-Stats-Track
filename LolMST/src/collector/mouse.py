@@ -3,12 +3,6 @@ import time
 
 
 class MouseCollector:
-    """
-    Escucha el mouse en un hilo aparte.
-    - start() -> inicia el listener (no bloquea)
-    - stop()  -> detiene el listener
-    """
-
     def __init__(self, callback, move_interval: float = 0.02):
         self.callback = callback
         self.move_interval = move_interval
@@ -19,11 +13,9 @@ class MouseCollector:
         )
 
     def start(self):
-        """Inicia el listener en un hilo separado."""
         self._listener.start()
 
     def stop(self):
-        """Detiene el listener."""
         self._listener.stop()
 
     def on_click(self, x, y, button, pressed):
@@ -39,4 +31,5 @@ class MouseCollector:
 
     def on_move(self, x, y):
             return
+
 
