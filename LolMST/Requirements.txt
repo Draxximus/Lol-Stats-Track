@@ -1,0 +1,10 @@
+pynput
+opencv-python
+numpy
+pillow
+matplotlib
+pandas
+keyboard
+mouse
+tinydb
+psutil
