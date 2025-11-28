@@ -29,8 +29,6 @@ with _conn:
         );
         """
     )
-
-# Tabla de eventos
 with _conn:
     _conn.execute(
         """
@@ -46,8 +44,6 @@ with _conn:
         );
         """
     )
-
-# Migración simple: asegurarnos de que exista la columna session_id
 with _conn:
     cur = _conn.execute("PRAGMA table_info(events);")
     cols = [row[1] for row in cur.fetchall()]
@@ -55,21 +51,10 @@ with _conn:
         print("[DB] Agregando columna session_id a events (migración).")
         _conn.execute("ALTER TABLE events ADD COLUMN session_id INTEGER;")
 
-# Sesión actual en memoria
 _current_session_id: Optional[int] = None
 
-
-# ==========================
-#  MANEJO DE SESIONES
-# ==========================
-
 def start_new_session(name: Optional[str] = None) -> int:
-    """
-    Crea una nueva sesión (partida) y la marca como sesión actual.
-    name: nombre opcional para identificar la sesión (ej: 'Ranked top', 'Normals', etc.)
-    """
     global _current_session_id
-
     started_at = time.time()
     with _lock, _conn:
         cur = _conn.cursor()
@@ -82,15 +67,10 @@ def start_new_session(name: Optional[str] = None) -> int:
     print(f"[DB] Nueva sesión iniciada: id={_current_session_id}, name={name}")
     return _current_session_id
 
-
 def get_current_session_id() -> Optional[int]:
     return _current_session_id
 
-
 def get_latest_session_id() -> Optional[int]:
-    """
-    Devuelve el id de la sesión más reciente, o None si no hay.
-    """
     with _lock:
         cur = _conn.cursor()
         cur.execute(
@@ -100,20 +80,10 @@ def get_latest_session_id() -> Optional[int]:
 
     return row[0] if row else None
 
-
-# ==========================
-#  EVENTOS
-# ==========================
-
 def save_event(event: Dict):
-    """
-    Guarda un evento en SQLite, asociado a la sesión actual.
-    Si no hay sesión actual, crea una nueva automáticamente.
-    """
     global _current_session_id
 
     if _current_session_id is None:
-        # Si por cualquier motivo nadie inició sesión, la creamos aquí
         start_new_session(name="auto")
 
     type_ = event.get("type")
@@ -167,4 +137,5 @@ def load_events(session_id: int | None = None, event_type: str | None = None):
         })
 
     print(f"[DB] Eventos cargados desde SQLite: {len(events)} (session_id={session_id})")
+
     return events
